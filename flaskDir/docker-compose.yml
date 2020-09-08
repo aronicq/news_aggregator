@@ -1,0 +1,33 @@
+version: '3'
+services:
+  backend:
+    container_name: flask.aggr
+    build:
+      context: .
+      dockerfile: Dockerfile_flask
+    restart: always
+    environment:
+      - APP_NAME=MyFlaskApp
+    expose:
+      - 8080
+
+  web:
+    container_name: nginx.aggr
+    build:
+      context: Dockerfile_nginx/.
+      dockerfile: Dockerfile_nginx
+    ports:
+    - "81:80"
+    restart: always
+
+#  db:
+#    image: postrges
+#    restart: always
+#    container_name: postgres.aggr
+#    build:
+#      context: Dockerfile_postgres/.
+#      dockerfile: Dockerfile_postgres
+#    environment:
+#      POSTGRES_PASSWORD: example
+#    ports:
+#      - "5433:5432"

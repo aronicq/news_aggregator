@@ -1,0 +1,9 @@
+flask
+google-api-python-client
+oauth2client
+BeautifulSoup4
+python-dateutil
+lxml
+flask_cors
+flask_excel
+uwsgi
