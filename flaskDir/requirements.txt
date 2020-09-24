@@ -7,3 +7,5 @@ lxml
 flask_cors
 flask_excel
 uwsgi
+flask_sqlalchemy
+psycopg2

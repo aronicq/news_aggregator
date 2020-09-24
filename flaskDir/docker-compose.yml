@@ -6,10 +6,8 @@ services:
       context: .
       dockerfile: Dockerfile_flask
     restart: always
-    environment:
-      - APP_NAME=MyFlaskApp
-    expose:
-      - 8080
+    depends_on:
+      - db
 
   web:
     container_name: nginx.aggr
@@ -20,14 +18,14 @@ services:
     - "81:80"
     restart: always
 
-#  db:
-#    image: postrges
-#    restart: always
-#    container_name: postgres.aggr
-#    build:
-#      context: Dockerfile_postgres/.
-#      dockerfile: Dockerfile_postgres
-#    environment:
-#      POSTGRES_PASSWORD: example
-#    ports:
-#      - "5433:5432"
+  db:
+    image: postgres
+    restart: always
+    container_name: postgres.aggr
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+#    volumes:
+#      - ./postgres/data:/var/lib/postgresql/data:rw
+    ports:
+      - 5433:5432
