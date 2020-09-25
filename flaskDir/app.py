@@ -22,16 +22,13 @@ SessionMaker = sessionmaker(bind=engine)
 
 with app.app_context():
     db.create_all()
-    # db.session.commit()
 
 
 def parse_content(title_col, auth_col, date_col, pre_col, html):
     title = authors = date = preview = ""
     title = html.find(class_=title_col)
 
-    h = requests.get(title["href"]).content
-    content = BeautifulSoup(h, 'html.parser').find(class_="post-details clearfix")
-    # print("parse: " + str(content))
+    content = title["href"]
 
     title = title.next_element.strip("\n")
     authors = html.find(class_=auth_col)
@@ -45,7 +42,7 @@ def parse_content(title_col, auth_col, date_col, pre_col, html):
             "authors": authors,
             "date": date,
             "preview": preview,
-            "content": content.text}
+            "content": content}
 
 
 def to_dict(row):
@@ -61,8 +58,6 @@ def to_dict(row):
 def reacted():
     session = SessionMaker()
     result = session.query(Article).all()
-    #db.session.query(Article).all()
-    # print("api/get: " + str(result[0].title))
     return jsonify({"articles": [Article.get_fields(r) for r in result]})
 
 
@@ -83,19 +78,15 @@ def news():
     for i in result:
         temp = parse_content("search-result-item-headline", "search-result-item-author", "search-result-item-date",
                              "search-result-item-content", i)
-        # print(temp)
         resultlist.append(temp)
 
         try:
-            # print(json.dumps(temp))
             db.session.add(dict_to_args(constr=Article, d=temp))
             db.session.commit()
         finally:
             db.session.close()
 
-        temp = ""
-
-    return "ok"
+    return reacted()
 
 
 @app.route("/news")

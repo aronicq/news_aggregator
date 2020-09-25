@@ -1,60 +1,65 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import axios from 'axios';
 
 function App() {
-  return (
-    <div>
+     return (
+        <div>
+            {/*<img src={logo} className="App-logo" alt="logo" />*/}
             <Panel/>
-    </div>
-  );
+        </div>
+    );
 }
 
 
 class Panel extends React.Component{
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             articles: [{"authors":"Will McCallum",
-                        "content":"",
+                        "content":"//google.com",
                         "date":"21 September 2020",
                         "preview":"Today, scientists sounded...",
                         "title":"The ice is disappearing, BUT a movement is emerging",
                         "id": 13},]
         }
-
-        fetch("/news/api/get")
-        .then(res => {
-            if (res.ok) {
-                return res.json();
-            } else {
-                throw new Error("request error occurred");
-            }
-        })
-
-        .then(
-            (res) => {
-                this.state = {
-                    articles: res.articles,
-                }
-            }
-        )
-        .catch((error) => {
-            console.log("error");
-        })
+        //
+        // fetch("/news/api/get")
+        // .then(res => {
+        //     if (res.ok) {
+        //         console.log("ok block ", res)
+        //         return res.json();
+        //     } else {
+        //         throw new Error("request error occurred");
+        //     }
+        // })
+        //
+        // .then(
+        //     (res) => {
+        //         console.log("then block")
+        //         this.state = {
+        //             articles: res.articles,
+        //         }
+        //         console.log(this.state)
+        //     }
+        // )
+        // .catch((error) => {
+        //     console.log("error");
+        // })
+        // console.log(this.state)
     }
 
     componentDidMount() {
-    // fetch("/news/api/get")
-    //     .then(res => res.json())
-    //     .then(
-    //         (result) => {
-    //             this.setState({
-    //                 articles: result.articles,
-    //             })
-    //         }
-    //     )
+        axios.get("/news/api/get")//"http://0.0.0.0:81/news/api/get"
+        .then(res => {
+            console.log(res);
+                this.setState({
+                    articles: res.data.articles,
+                })
+            }
+        )
     }
 
     render() {
@@ -70,8 +75,8 @@ class Panel extends React.Component{
 class NewsCell extends React.Component{
     render(){
         return(
-            <div className="cell">
-                <div className="title">{this.props.article.title}</div>
+            <div className="Cell">
+                <div className="title"><a href={this.props.article.content}>{this.props.article.title}</a></div>
                 <div className="author">{this.props.article.authors}</div>
                 <div className="date">{this.props.article.date}</div>
                 <div className="preview">{this.props.article.preview}</div>
