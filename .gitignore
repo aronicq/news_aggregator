@@ -11,3 +11,4 @@ db_file.db
 
 *.json
 
+**/venv

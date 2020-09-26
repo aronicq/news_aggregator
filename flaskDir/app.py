@@ -1,3 +1,5 @@
+import sys
+
 from bs4 import BeautifulSoup
 import flask
 import requests
@@ -9,7 +11,14 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.schedulers.background import BackgroundScheduler
+# from flask_apscheduler import APScheduler
+
 from models import Article, db
+
+scheduler = BackgroundScheduler()
+
 
 app = Flask(__name__)
 app.config.update({"SQLALCHEMY_DATABASE_URI": "postgresql://postgres:postgres@postgres.aggr:5432/",
@@ -55,14 +64,14 @@ def to_dict(row):
 
 
 @app.route("/news/api/get")
-def reacted():
+def getter():
     session = SessionMaker()
     result = session.query(Article).all()
     return jsonify({"articles": [Article.get_fields(r) for r in result]})
 
 
 @app.route("/news/api/parse")
-def news():
+def parse_page():
     def dict_to_args(constr, d):
         return constr(title=d["title"],
                       authors=d["authors"],
@@ -74,23 +83,44 @@ def news():
     html = requests.get("https://www.greenpeace.org/international/story/").content
     result = BeautifulSoup(html, 'html.parser').find_all(class_="search-result-list-item")
     resultlist = []
+    with app.app_context():
+        session = SessionMaker()
+        past_result = session.query(Article).all()
+        past_contents = [Article.get_fields(r) for r in past_result]
+        session.close()
 
-    for i in result:
-        temp = parse_content("search-result-item-headline", "search-result-item-author", "search-result-item-date",
-                             "search-result-item-content", i)
-        resultlist.append(temp)
+        num_of_added_elem = 0
+        for i in result:
+            temp = parse_content("search-result-item-headline", "search-result-item-author", "search-result-item-date",
+                                 "search-result-item-content", i)
+            resultlist.append(temp)
 
-        try:
-            db.session.add(dict_to_args(constr=Article, d=temp))
-            db.session.commit()
-        finally:
-            db.session.close()
+            try:
+                parsed_article = dict_to_args(constr=Article, d=temp)
 
-    return reacted()
+                if temp["content"] not in [j["content"] for j in past_contents]:
+
+                    db.session.add(parsed_article)
+                    db.session.commit()
+                    num_of_added_elem += 1
+
+            except Exception as e:
+                print("exception in adding block:" + str(e))
+
+        session = SessionMaker()
+        result = session.query(Article).all()
+        session.close()
+
+        return jsonify({"num": num_of_added_elem,
+                        "articles": [Article.get_fields(r) for r in result]})
+
+
+scheduler.add_job(parse_page, 'interval', seconds=10)
+scheduler.start()
 
 
 @app.route("/news")
-def index():
+def news_page():
     return flask.render_template("index.html")
 
 

@@ -9,3 +9,4 @@ flask_excel
 uwsgi
 flask_sqlalchemy
 psycopg2
+apscheduler

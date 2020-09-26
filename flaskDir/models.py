@@ -4,7 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-
 class Article(db.Model):
     __tablename__ = "Articles"
 
@@ -26,14 +25,9 @@ class Article(db.Model):
         return 'id = {}'.format(self.id)
 
     def get_fields(self):
-        # print("models: title - " + self.title +
-        # "authors - " + self.authors +
-        # "date - " + self.date +
-        # "preview - " + self.preview +
-        # "content - " + self.content)
         return {"title": self.title,
-                        "authors": self.authors,
-                        "date": self.date,
-                        "preview": self.preview,
-                        "content": self.content,
-                        "id": self.id}
+                "authors": self.authors,
+                "date": self.date,
+                "preview": self.preview,
+                "content": self.content,
+                "id": self.id}
